@@ -111,9 +111,9 @@ footer{color:var(--muted);font-size:11.5px;text-align:center;padding:20px 0 0}
   .specs{grid-template-columns:1fr 1fr}
   table.wide{font-size:11.5px}
   .note{max-width:none}
-  .itm tr>*:nth-child(4),.itm tr>*:nth-child(6),.itm tr>*:nth-child(8),
-  .itm tr>*:nth-child(9),.itm tr>*:nth-child(10),.itm tr>*:nth-child(11){display:none}
-  .itm td.n,.itm td.l{white-space:normal}
+  /* 保留全部 11 列，改横向滚动，不再隐藏列 */
+  .itm{min-width:920px}
+  .itm td.n,.itm td.l{white-space:nowrap}
   .srow .nm{width:66px}
   .srow .vv{width:64px;font-size:11px}
 }
