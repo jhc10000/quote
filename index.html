@@ -51,6 +51,13 @@ nav a.on{color:#fff;border-bottom-color:var(--amber);font-weight:600}
 .card h2:before{content:"";width:3px;height:15px;background:var(--amber);border-radius:2px}
 .hint{font-size:12px;color:var(--muted);margin:-4px 0 10px}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--grid);border-radius:8px}
+/* 成本构成明细：数量列最小宽度，输入框内数字不再被裁 */
+.itm th:nth-child(5),.itm td:nth-child(5){min-width:96px}
+.itm input.mq{min-width:88px}
+/* 汇总表里由明细统计出来的格子：可点击跳转 */
+.sumlink{cursor:pointer;text-decoration:underline dotted rgba(120,120,120,.55);text-underline-offset:3px}
+.sumlink:hover{color:var(--amber)}
+tr.flash td{background:#FBF0CF!important;transition:background .25s}
 table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{padding:6px 9px;border-bottom:1px solid var(--grid);text-align:right;white-space:nowrap}
 th{background:#FAF8F3;font-weight:600;color:var(--ink2);font-size:12px;position:sticky;top:0}
@@ -112,7 +119,7 @@ footer{color:var(--muted);font-size:11.5px;text-align:center;padding:20px 0 0}
   table.wide{font-size:11.5px}
   .note{max-width:none}
   /* 保留全部 11 列，改横向滚动，不再隐藏列 */
-  .itm{min-width:920px}
+  .itm{min-width:980px}
   .itm td.n,.itm td.l{white-space:nowrap}
   .srow .nm{width:66px}
   .srow .vv{width:64px;font-size:11px}
@@ -987,7 +994,7 @@ function pageDev() {
   var body = '<div class="tw" style="max-height:380px;overflow-y:auto"><table class="wide"><thead><tr><th class="l">工序</th><th>设备数</th><th>月产能 吨</th><th>工资 元/月</th><th>电费 元/月</th><th>设备折旧</th><th>厂房折旧</th><th>人工 元/吨</th><th>电 元/吨</th><th>设备折/吨</th><th>厂房折/吨</th><th>四项合计 元/吨</th></tr></thead><tbody>';
   gsum.forEach(function (x) {
     var perT = function (v) { return x.v.cap > 0 ? v / x.v.cap : 0; };
-    body += '<tr><td class="l">' + esc(x.k) + '</td><td class="mono">' + x.v.n + '</td><td class="mono">' + fm0(x.v.cap, 0) + '</td><td class="mono">' + fm0(x.v.s, 0) + '</td><td class="mono">' + fm0(x.v.w, 0) + '</td><td class="mono">' + fm0(x.v.aa, 0) + '</td><td class="mono">' + fm0(x.v.af, 0) + '</td>' +
+    body += '<tr><td class="l">' + esc(x.k) + '</td><td class="mono sumlink" data-blk="' + esc(x.k) + '" title="由下方设备明细统计，点此跳到明细修改">' + x.v.n + '</td><td class="mono sumlink" data-blk="' + esc(x.k) + '" title="由下方设备明细统计，点此跳到明细修改">' + fm0(x.v.cap, 0) + '</td><td class="mono">' + fm0(x.v.s, 0) + '</td><td class="mono">' + fm0(x.v.w, 0) + '</td><td class="mono">' + fm0(x.v.aa, 0) + '</td><td class="mono">' + fm0(x.v.af, 0) + '</td>' +
       '<td class="mono">' + fm(perT(x.v.s), 2) + '</td><td class="mono">' + fm(perT(x.v.w), 2) + '</td><td class="mono">' + fm(perT(x.v.aa), 2) + '</td><td class="mono">' + fm(perT(x.v.af), 2) + '</td><td class="mono"><b>' + fm(perT(x.v.s + x.v.w + x.v.aa + x.v.af), 2) + "</b></td></tr>";
   });
   var tot = S.dev.reduce(function (a, d) { return { s: a.s + num(d.wage), w: a.w + num(d.kwh), aa: a.aa + num(d.depr), af: a.af + num(d.pdepr), cap: a.cap + num(d.cap) }; }, { s: 0, w: 0, aa: 0, af: 0, cap: 0 });
@@ -1005,7 +1012,7 @@ function pageDev() {
       '<td><button class="btn sm dvd" data-r="' + d.r + '">删</button></td></tr>';
   });
   det += "</tbody></table></div>";
-  $("#main").innerHTML = card("设备与费用分摊 · 工序汇总（精算分母依据）", body, '<div class="hint">每个工序四项费用 ÷ 该工序产能 = 元/吨；改下面明细任何一格（工资/用电/设备折旧/厂房折旧/产能），这里与核价结果立刻变。四个费用项：工资、用电、设备折旧、厂房折旧。</div>') +
+  $("#main").innerHTML = card("设备与费用分摊 · 工序汇总（精算分母依据）", body, '<div class="hint">每个工序四项费用 ÷ 该工序产能 = 元/吨；改下面明细任何一格（工资/用电/设备折旧/厂房折旧/产能），这里与核价结果立刻变。<b>「设备数」「月产能」是明细统计值，不能直接改 —— 点这两个数字会跳到下面明细对应行并高亮，在那里改。</b>四个费用项：工资、用电、设备折旧、厂房折旧。</div>') +
     card("设备明细（" + S.dev.length + " 台/行，可改、可增删）", '<div class="bar" style="margin:0 0 8px"><button class="btn sm" id="adddev">新增设备行</button><span style="font-size:12.5px;color:var(--muted)">改完按回车或点其它格子即生效</span></div>' + det);
   $$(".dv").forEach(function (i) {
     i.onchange = function () {
@@ -1021,6 +1028,24 @@ function pageDev() {
       var r = num(this.dataset.r);
       S.dev = S.dev.filter(function (x) { return x.r !== r; });
       save(); render();
+    };
+  });
+  /* 汇总表的「设备数 / 月产能」是明细统计值：点一下跳到明细里对应行并高亮 */
+  $$(".sumlink").forEach(function (td) {
+    td.onclick = function () {
+      var blk = this.dataset.blk;
+      var rs = S.dev.filter(function (d) { return (blkOf(d) || "其他") === blk; }).map(function (d) { return d.r; });
+      if (!rs.length) return;
+      var first = document.querySelector('input.dv[data-k="cap"][data-r="' + rs[0] + '"]');
+      if (!first) return;
+      first.closest("tr").scrollIntoView({ block: "center", behavior: "smooth" });
+      rs.forEach(function (r) {
+        var i = document.querySelector('input.dv[data-k="cap"][data-r="' + r + '"]');
+        if (!i) return;
+        var tr = i.closest("tr");
+        tr.classList.add("flash");
+        setTimeout(function () { tr.classList.remove("flash"); }, 1800);
+      });
     };
   });
   var ad = $("#adddev");
